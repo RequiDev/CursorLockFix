@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using MelonLoader;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace CursorLockFix
 {
@@ -31,11 +33,27 @@ namespace CursorLockFix
         [DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
         private static extern IntPtr FindWindow(IntPtr zeroOnly, string lpWindowName);
 
+        private bool _isVr;
+
         private bool _unlockedCursor;
         private IntPtr _gameHwnd;
-        
+
+        private bool IsVr()
+        {
+            return _isVr || XRDevice.isPresent;
+        }
+
+        public override void OnApplicationStart()
+        {
+            _isVr = Environment.GetCommandLineArgs()
+                .All(args => !args.Equals("--no-vr", StringComparison.OrdinalIgnoreCase));
+        }
+
         public override void OnUpdate()
         {
+            if (IsVr())
+                return;
+
             if (_gameHwnd == IntPtr.Zero)
             {
                 _gameHwnd = FindWindow(IntPtr.Zero, Application.productName);
