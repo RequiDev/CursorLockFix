@@ -11,7 +11,7 @@ namespace CursorLockFix
     {
         public const string Name = nameof(CursorLockFix);
         public const string Author = "Requi";
-        public const string Version = "1.0";
+        public const string Version = "1.2";
     }
 
     public class Main : MelonMod
@@ -63,6 +63,10 @@ namespace CursorLockFix
                     return;
                 }
             }
+
+            const int titleBarHeight = 45;
+            const int borderSize = 10;
+
             if (Application.isFocused)
             {
                 var windowRect = new RECT();
@@ -70,10 +74,10 @@ namespace CursorLockFix
 
                 var cursorLimits = new RECT
                 {
-                    Left = windowRect.Left,
-                    Top = windowRect.Top,
-                    Right = Screen.width - 1,
-                    Bottom = Screen.height - 1
+                    Left = windowRect.Left + borderSize,
+                    Top = windowRect.Top + titleBarHeight,
+                    Right = windowRect.Right - borderSize,
+                    Bottom = windowRect.Bottom - borderSize
                 };
                 ClipCursor(ref cursorLimits);
                 _unlockedCursor = false;
