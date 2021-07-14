@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using MelonLoader;
@@ -11,7 +12,7 @@ namespace CursorLockFix
     {
         public const string Name = nameof(CursorLockFix);
         public const string Author = "Requi";
-        public const string Version = "1.2";
+        public const string Version = "1.3";
     }
 
     public class Main : MelonMod
@@ -31,7 +32,9 @@ namespace CursorLockFix
         [DllImport("user32.dll")]
         private static extern bool GetWindowRect(IntPtr hwnd, ref RECT lpRect);
         [DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
-        private static extern IntPtr FindWindow(IntPtr zeroOnly, string lpWindowName);
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
 
         private bool _isVr;
 
@@ -56,7 +59,7 @@ namespace CursorLockFix
 
             if (_gameHwnd == IntPtr.Zero)
             {
-                _gameHwnd = FindWindow(IntPtr.Zero, Application.productName);
+                _gameHwnd = FindWindow("UnityWndClass", Application.productName);
                 if (_gameHwnd == IntPtr.Zero)
                 {
                     UnlockCursor();
@@ -67,7 +70,7 @@ namespace CursorLockFix
             const int titleBarHeight = 45;
             const int borderSize = 10;
 
-            if (Application.isFocused)
+            if (_gameHwnd == GetForegroundWindow()) // I don't trust Application.isFocused anymore
             {
                 var windowRect = new RECT();
                 GetWindowRect(_gameHwnd, ref windowRect);
